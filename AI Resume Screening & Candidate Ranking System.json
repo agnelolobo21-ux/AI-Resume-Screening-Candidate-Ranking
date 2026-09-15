@@ -1,0 +1,1299 @@
+{
+  "name": "AI Resume Screening & Candidate Ranking System",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Candidate Resume",
+        "formDescription": "Fill in the required details.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Candidate Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Candidate Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Job Position",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Job Description",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Resume",
+              "fieldType": "file",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -224,
+        -112
+      ],
+      "id": "906d1015-effb-4936-9c0a-fd3cf414a9dc",
+      "name": "On form submission",
+      "webhookId": "eb30238a-59ec-477a-a505-d00f98720041"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Resume",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        -112
+      ],
+      "id": "f163d349-4c62-4f0e-96aa-587b1af69aa6",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI recruitment screening assistant.\n\nYour task is to evaluate a candidate's resume against the provided job description for the specified position.\n\nEvaluate ONLY job-relevant qualifications and evidence contained in the resume and job description.\n\nJOB POSITION:\n{{ $('On form submission').item.json['Job Position'] }}\n\nJOB DESCRIPTION:\n{{ $('On form submission').item.json['Job Description'] }}\n\nCANDIDATE RESUME:\n{{ $json.text }}\n\nEVALUATION CRITERIA\n\nEvaluate the candidate on the following four dimensions:\n\n1. SKILLS MATCH\n\nCompare the candidate's demonstrated technical, professional, and job-specific skills against the skills required or preferred in the job description.\n\nConsider equivalent or transferable technologies where appropriate. Do not automatically penalize a candidate simply because the resume uses an equivalent tool or technology.\n\n2. EDUCATION MATCH\n\nCompare the candidate's education, degree, field of study, and relevant certifications against the education requirements in the job description.\n\n3. EXPERIENCE MATCH\n\nEvaluate the candidate's years of experience, job titles, industries, and relevance of previous work experience to the position.\n\nDo not rely on job title alone. Evaluate the actual responsibilities and work described in the resume.\n\n4. RESPONSIBILITIES MATCH\n\nCompare the candidate's demonstrated responsibilities and achievements against the responsibilities described in the job description.\n\nSCORING CALIBRATION AND EVIDENCE STANDARDS\n\nUse the following calibration when assigning each score.\n\nThe score must reflect the candidate's actual demonstrated match to the job description, not simply the presence of some related experience.\n\nUse this general scale:\n\n90–100 = Exceptional/direct match. The resume provides strong, specific evidence that the candidate substantially meets or exceeds the requirement with relevant depth and experience.\n\n80–89 = Strong match. The candidate meets most of the requirement with clear relevant evidence, but may have one or two meaningful gaps.\n\n70–79 = Good/partial match. The candidate has substantial relevant or transferable experience but has noticeable gaps in required technical depth, duration, education, or direct responsibility.\n\n60–69 = Moderate/partial match. Some relevant qualifications are demonstrated, but several important requirements are missing or only weakly demonstrated.\n\n40–59 = Limited match. The candidate has some related or transferable qualifications, but significant job-relevant requirements are missing.\n\n20–39 = Weak match. Only limited relevant evidence is present.\n\n0–19 = Very poor/no meaningful match. The resume provides little or no evidence of meeting the requirement.\n\nIMPORTANT CALIBRATION RULES\n\n1. Direct evidence should score higher than transferable or adjacent experience.\n\n2. Do not award a high score merely because a candidate has performed tasks that are generally related to the job. Compare the depth, complexity, duration, and level of responsibility against the actual job description.\n\n3. When the job description specifies a technical skill level, evaluate the demonstrated level of proficiency. For example, \"basic SQL\" should not be treated as equivalent to \"advanced SQL with joins and subqueries.\"\n\n4. When a candidate describes basic, introductory, exposure-level, or foundational knowledge of a required technology, do not treat it as equivalent to hands-on professional proficiency.\n\n5. When the job description specifies years of experience, compare the candidate's RELEVANT experience to that requirement. Do not automatically count unrelated professional experience as relevant experience.\n\n6. A candidate transitioning into a role should not receive the same experience score as a candidate with direct professional experience in that target role when the job description requires relevant experience.\n\n7. For responsibilities, distinguish between:\n   \n   - directly performing the responsibility at the required level,\n   - performing a simpler or supporting version of the responsibility,\n   - and merely having related exposure.\n\n8. Missing or weakly demonstrated requirements should reduce the relevant score even when the candidate has several other strong qualifications.\n\n9. Do not compensate for a major missing requirement by giving unusually high scores in unrelated dimensions.\n\n10. Use the entire job description when scoring. Consider required qualifications, preferred qualifications, experience level, technical depth, education requirements, and key responsibilities.\n\n11. Do not infer proficiency, years of experience, job responsibilities, or qualifications that are not explicitly supported by the resume.\n\n12. A candidate may have a high score in one dimension and a substantially lower score in another. Do not force all four scores to be similar.\n\n13. When evidence is ambiguous, use the more conservative score supported by the resume.\n\n14. Do not use the candidate's overall impression, writing quality, or apparent potential as a substitute for demonstrated qualifications.\n\n15. The score should represent MATCH TO THE SPECIFIC JOB DESCRIPTION, not the candidate's general employability.\n\nEXPERIENCE-SPECIFIC CALIBRATION\n\nWhen evaluating experience_match, give substantial weight to:\n\n- Relevant years of experience\n- Direct relevance of previous roles\n- Similarity between previous responsibilities and the target role\n- Technical complexity of previous work\n- Level of independence and ownership\n- Demonstrated achievements\n- Whether the candidate has direct experience in the target role or is transitioning into it\n\nDo not treat total career duration as equivalent to relevant experience.\n\nRESPONSIBILITIES-SPECIFIC CALIBRATION\n\nWhen evaluating responsibilities_match, compare each major responsibility in the job description against evidence in the resume.\n\nGive higher scores when the candidate has directly performed comparable responsibilities at a similar level of complexity.\n\nGive lower scores when the candidate has only:\n\n- assisted with the activity,\n- performed a basic version of the activity,\n- maintained existing systems rather than created or owned them,\n- used a tool only at a basic level,\n- or demonstrated only indirectly related experience.\n\nA candidate who matches several responsibilities but lacks important technical depth or performs those responsibilities at a lower level should receive a partial rather than a near-perfect responsibilities score.\n\nSCORING REQUIREMENT\n\nYou MUST calculate and return EXACTLY these four numerical scores.\n\nYou MUST return ALL FOUR scores.\n\nThe four required score fields are:\n\nskills_match\neducation_match\nexperience_match\nresponsibilities_match\n\n1. skills_match\n\nCompare the candidate's demonstrated skills with the skills required or preferred by the job description.\n\nReturn an INTEGER from 0 to 100.\n\n2. education_match\n\nCompare the candidate's education, degree, field of study, and relevant certifications with the education requirements in the job description.\n\nReturn an INTEGER from 0 to 100.\n\n3. experience_match\n\nCompare the candidate's relevant professional experience with the experience requirements in the job description.\n\nConsider the relevance, duration, industries, actual responsibilities, and demonstrated achievements.\n\nReturn an INTEGER from 0 to 100.\n\n4. responsibilities_match\n\nCompare the candidate's demonstrated responsibilities and achievements with the responsibilities described in the job description.\n\nReturn an INTEGER from 0 to 100.\n\nCRITICAL OUTPUT RULES FOR THE FOUR SCORES\n\nThe output MUST contain ALL FOUR of these fields:\n\nskills_match\neducation_match\nexperience_match\nresponsibilities_match\n\nEach field MUST contain an INTEGER between 0 and 100.\n\nNever omit any of the four fields.\n\nNever return null for any of the four fields.\n\nNever return a blank value for any of the four fields.\n\nNever return a decimal value for any of the four fields.\n\nNever include the % symbol.\n\nIf the resume does not provide enough evidence for a criterion, DO NOT omit the score. Assign a conservative score based only on the available evidence.\n\nEven when evidence is limited or missing, you MUST still provide an integer score from 0 to 100.\n\nA valid evaluation MUST contain all four scores.\n\nExample of valid scores:\n\nskills_match: 85\neducation_match: 90\nexperience_match: 80\nresponsibilities_match: 88\n\nThe example values above are illustrative only. Calculate the actual scores from the resume and job description.\n\nDo NOT calculate the final overall score.\n\nDo NOT create an overall_score field.\n\nThe n8n workflow will calculate the final score separately.\n\nMISSING SKILLS\n\nIdentify important skills or qualifications from the job description that are missing or not demonstrated in the resume.\n\nOnly list genuinely relevant missing requirements.\n\nDo not list a skill as missing if the resume demonstrates a clearly equivalent or transferable skill.\n\nSTRENGTHS\n\nIdentify the candidate's strongest qualifications that are directly relevant to the job description.\n\nBase each strength on evidence from the resume.\n\nWEAKNESSES\n\nIdentify relevant gaps, limitations, or areas where the candidate does not fully meet the job requirements.\n\nDo not invent weaknesses that are not supported by the resume or job description.\n\nEXPERIENCE SUMMARY\n\nProvide a concise summary of the candidate's relevant professional experience, including approximate relevant years of experience and the most relevant responsibilities.\n\nEDUCATION SUMMARY\n\nProvide a concise summary of the candidate's relevant education and certifications.\n\nREASONING\n\nProvide a concise explanation of why the candidate received the scores.\n\nFocus on evidence from the resume and comparison with the job description.\n\nDo not make assumptions about information that is not present in the resume.\n\nFAIRNESS AND PRIVACY\n\nDo not consider or use the following factors when evaluating the candidate:\n\n- Age\n- Gender\n- Race or ethnicity\n- Religion\n- Disability or medical information\n- Marital or family status\n- Photograph or physical appearance\n- Nationality, unless it is explicitly a legitimate job requirement\n- Any other protected or irrelevant personal characteristic\n\nEvaluate the candidate only on job-related qualifications, skills, education, experience, and demonstrated responsibilities.\n\nOUTPUT REQUIREMENTS\n\nReturn ONLY the requested structured output.\n\nDo not use Markdown.\n\nDo not include headings outside the structured output.\n\nDo not include explanations outside the structured output.\n\nEnsure that ALL required fields are present.\n\nEnsure that skills_match is an integer from 0 to 100.\n\nEnsure that education_match is an integer from 0 to 100.\n\nEnsure that experience_match is an integer from 0 to 100.\n\nEnsure that responsibilities_match is an integer from 0 to 100.\n\nBefore returning the final output, verify that all four numerical score fields are present and contain integer values between 0 and 100.\n\nDo not omit any required field.",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        96,
+        -112
+      ],
+      "id": "1235a29f-34dc-428f-a6d7-328b91ee74c8",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        128,
+        32
+      ],
+      "id": "ceeeb1ae-80f9-4650-b519-953139a0f086",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "lc9KhaBEWfxTZioi",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"skills_match\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 100\n    },\n    \"education_match\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 100\n    },\n    \"experience_match\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 100\n    },\n    \"responsibilities_match\": {\n      \"type\": \"integer\",\n      \"minimum\": 0,\n      \"maximum\": 100\n    }\n  },\n  \"required\": [\n    \"skills_match\",\n    \"education_match\",\n    \"experience_match\",\n    \"responsibilities_match\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        32
+      ],
+      "id": "b38f1cd8-3d72-4562-a9b0-97ab61bead7f",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "be8c33dd-a2dd-4abe-a172-37349cf93d8c",
+              "name": "overall_score",
+              "value": "={{ Math.round(\r\n  ($json.output.skills_match * 0.40) +\r\n  ($json.output.experience_match * 0.30) +\r\n  ($json.output.responsibilities_match * 0.15) +\r\n  ($json.output.education_match * 0.15)\r\n) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        400,
+        -112
+      ],
+      "id": "2f9372d1-e8ec-416d-9cfb-e6d174fdfc87",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "804166e7-e9e5-44a2-a7a8-71990b999ca5",
+              "name": "classification",
+              "value": "={{ $json.overall_score >= 80 ? \"Strong\" : $json.overall_score >= 60 ? \"Review\" : \"Not Suitable\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        592,
+        -112
+      ],
+      "id": "efb4057e-6988-440e-a9ec-576fbd753017",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Evaluate the candidate's resume against the recruiter-provided Job Description.\n\nRecruiter Job Description:\n{{ $('On form submission').item.json['Job Description'] }}\n\nCandidate Resume:\n{{ $json.text }}\n\nProvide a concise, evidence-based evaluation of the candidate.\n\nFor missing_skills, identify important skills or qualifications from the Job Description that are not clearly demonstrated in the resume.\n\nFor strengths, identify the candidate's strongest qualifications relevant to the Job Description.\n\nFor weaknesses, identify relevant gaps or areas of concern based only on the resume and Job Description.\n\nFor experience_summary, summarize the candidate's relevant professional experience and how it relates to the position.\n\nFor education_summary, summarize the candidate's relevant education and how it relates to the position.\n\nFor reasoning, explain the main factors supporting your evaluation.\n\nDo not consider or infer protected or sensitive personal characteristics such as age, gender, race, religion, nationality, marital status, disability, or other characteristics unrelated to job qualifications.\nBase the evaluation only on information relevant to the job requirements.\nIMPORTANT DATA RULES:\n\nThe CANDIDATE NAME field above is the authoritative candidate name.\nIts value is exactly: {{ $('On form submission').item.json['Candidate Name'] }}\n\nNever use a different person's name, even if a different name appears inside the resume text.\n\nFor all six output fields, refer to the person only as \"the candidate\" or by the exact value from CANDIDATE NAME above.\n\nDo not copy or invent names, employers, universities, dates, job titles, or other personal details that are not clearly present in the supplied resume.\n\nUse only evidence actually present in the supplied resume and Job Description.\n\nThe Job Description is the recruiter's requirement and the Resume Text is the candidate's evidence. Compare the two; do not treat information from one as if it came from the other.\n\nDo not invent missing information.",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -208,
+        128
+      ],
+      "id": "608cbeb6-5859-4244-b042-0b7c8f2760a5",
+      "name": "Basic LLM Chain1",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        288
+      ],
+      "id": "543f186b-245c-49dd-9901-76466c45b5c6",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "lc9KhaBEWfxTZioi",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"missing_skills\": {\n      \"type\": \"string\"\n    },\n    \"strengths\": {\n      \"type\": \"string\"\n    },\n    \"weaknesses\": {\n      \"type\": \"string\"\n    },\n    \"experience_summary\": {\n      \"type\": \"string\"\n    },\n    \"education_summary\": {\n      \"type\": \"string\"\n    },\n    \"reasoning\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\n    \"missing_skills\",\n    \"strengths\",\n    \"weaknesses\",\n    \"experience_summary\",\n    \"education_summary\",\n    \"reasoning\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        288
+      ],
+      "id": "6ae36c00-9bbf-425e-af64-f22888f7b61c",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        448,
+        112
+      ],
+      "id": "de12e4cd-ac52-46f9-b1cb-1c2fe0bf71ca",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1AvMaVZmHpmJZiBDGBOr1V7eGZOBGURwFEkTFnjM-5Sw",
+          "mode": "list",
+          "cachedResultName": "AI Candidate Evaluations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AvMaVZmHpmJZiBDGBOr1V7eGZOBGURwFEkTFnjM-5Sw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AvMaVZmHpmJZiBDGBOr1V7eGZOBGURwFEkTFnjM-5Sw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Name": "={{ $('On form submission').item.json['Candidate Name'] }}",
+            "Candidate Email": "={{ $('On form submission').item.json['Candidate Email'] }}",
+            "Job Position\r": "={{ $('On form submission').item.json['Job Position'] }}",
+            "Job Description\r": "={{ $('On form submission').item.json['Job Description'] }}",
+            "Education Match": "={{ $('Basic LLM Chain').item.json.output.education_match }}",
+            "Strengths": "={{ $('Merge').item.json.output.strengths }}",
+            "Experience Summary": "={{ $('Merge').item.json.output.experience_summary }}",
+            "Reasoning": "=  {{ $('Merge').item.json.output.reasoning }}",
+            "Resume Filename": "={{ $('On form submission').item.json.Resume[0].filename }}",
+            "Timestamp": "={{ $now }}",
+            "Experience Match": "={{ $('Basic LLM Chain').item.json.output.experience_match }}",
+            "Responsibilities Match": "={{ $('Basic LLM Chain').item.json.output.responsibilities_match }}",
+            "Overall Score": "={{ $('Edit Fields').item.json.overall_score }}",
+            "Classification": "={{ $('Merge').item.json.classification }}",
+            "Missing Skills": "={{ $('Merge').item.json.output.missing_skills }}",
+            "Weaknesses": "={{ $('Merge').item.json.output.weaknesses }}",
+            "Education Summary": "={{ $('Merge').item.json.output.education_summary }}",
+            "Skills Match": "={{ $('Basic LLM Chain').item.json.output.skills_match }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Candidate Name",
+              "displayName": "Candidate Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Candidate Email",
+              "displayName": "Candidate Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Job Position\r",
+              "displayName": "Job Position\r",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Job Description\r",
+              "displayName": "Job Description\r",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Skills Match",
+              "displayName": "Skills Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Education Match",
+              "displayName": "Education Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Experience Match",
+              "displayName": "Experience Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Responsibilities Match",
+              "displayName": "Responsibilities Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Overall Score",
+              "displayName": "Overall Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Classification",
+              "displayName": "Classification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Missing Skills",
+              "displayName": "Missing Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Strengths",
+              "displayName": "Strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Weaknesses",
+              "displayName": "Weaknesses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Experience Summary",
+              "displayName": "Experience Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Education Summary",
+              "displayName": "Education Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Resume Filename",
+              "displayName": "Resume Filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        816,
+        112
+      ],
+      "id": "3ac30698-b990-4c8a-8f6c-1e755585fbaa",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4IdK26aCaBSm1Kw6",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "90b80f02-fc93-40f7-bbfa-9648798b46b5",
+              "leftValue": "={{ $json.classification }}",
+              "rightValue": "Strong",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        112
+      ],
+      "id": "bf3886b5-f1ab-4411-8699-cc949cac8c97",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Candidate Email'] }}",
+        "subject": "Application Update - Data Analyst",
+        "emailType": "text",
+        "message": "=Hi {{ $json[\"Candidate Name\"] }},\nThank you for applying for the Data Analyst position.\nYour application has successfully passed our initial screening, and your overall evaluation score is {{ $json['Overall Score'] }}/100. We are pleased to inform you that your application has been classified as a Strong Match.\nOur recruitment team will contact you regarding the next steps in the selection process.\nBest regards,\nRecruitment Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        192
+      ],
+      "id": "299504d6-79aa-4a35-b121-3fcbe0da8349",
+      "name": "Send a message",
+      "webhookId": "a49d5326-4fb7-40eb-ab62-bf1829dfbfba",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DCZaGzOw3htVdaSU",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Merge').item.json.classification }}",
+                    "rightValue": "Review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "626c2390-4f86-406c-846c-d69602c28e9b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Review"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bbe9e5dd-fdee-4ae6-aa01-a5891f8c1e62",
+                    "leftValue": "={{ $('Merge').item.json.classification }}",
+                    "rightValue": "Not Suitable",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Not Suitable"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        528,
+        368
+      ],
+      "id": "425f7c79-0a34-4483-91b1-c4230e22572e",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1AvMaVZmHpmJZiBDGBOr1V7eGZOBGURwFEkTFnjM-5Sw",
+          "mode": "list",
+          "cachedResultName": "AI Candidate Evaluations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AvMaVZmHpmJZiBDGBOr1V7eGZOBGURwFEkTFnjM-5Sw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AvMaVZmHpmJZiBDGBOr1V7eGZOBGURwFEkTFnjM-5Sw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Resume Filename": "={{ $('On form submission').item.json.Resume[0].filename }}",
+            "Timestamp": "={{ $now }}",
+            "Reasoning": "={{ $('Merge').item.json.output.reasoning }}",
+            "Education Summary": "={{ $('Merge').item.json.output.education_summary }}",
+            "Experience Summary": "={{ $('Merge').item.json.output.experience_summary }}",
+            "Weaknesses": "={{ $('Merge').item.json.output.weaknesses }}",
+            "Strengths": "={{ $('Merge').item.json.output.strengths }}",
+            "Missing Skills": "={{ $('Merge').item.json.output.missing_skills }}",
+            "Classification": "={{ $('Switch').item.json.classification }}",
+            "Overall Score": "={{ $('Switch').item.json.overall_score }}",
+            "Experience Match": "={{ $json.output.experience_match }}",
+            "Education Match": "={{ $json.output.education_match }}",
+            "Skills Match": "={{ $json.output.skills_match }}",
+            "Job Description\r": "={{ $('On form submission').item.json['Job Description'] }}",
+            "Job Position\r": "={{ $('On form submission').item.json['Job Position'] }}",
+            "Candidate Email": "={{ $('On form submission').item.json['Candidate Email'] }}",
+            "Candidate Name": "={{ $('On form submission').item.json['Candidate Name'] }}",
+            "Responsibilities Match": "={{ $json.output.responsibilities_match }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Candidate Name",
+              "displayName": "Candidate Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Candidate Email",
+              "displayName": "Candidate Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Position\r",
+              "displayName": "Job Position\r",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Description\r",
+              "displayName": "Job Description\r",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Skills Match",
+              "displayName": "Skills Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Education Match",
+              "displayName": "Education Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experience Match",
+              "displayName": "Experience Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Responsibilities Match",
+              "displayName": "Responsibilities Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Overall Score",
+              "displayName": "Overall Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Classification",
+              "displayName": "Classification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Missing Skills",
+              "displayName": "Missing Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Strengths",
+              "displayName": "Strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Weaknesses",
+              "displayName": "Weaknesses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experience Summary",
+              "displayName": "Experience Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Education Summary",
+              "displayName": "Education Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resume Filename",
+              "displayName": "Resume Filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        784,
+        288
+      ],
+      "id": "3ceb60a6-958c-4587-9124-7a7825ff035d",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4IdK26aCaBSm1Kw6",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1AvMaVZmHpmJZiBDGBOr1V7eGZOBGURwFEkTFnjM-5Sw",
+          "mode": "list",
+          "cachedResultName": "AI Candidate Evaluations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AvMaVZmHpmJZiBDGBOr1V7eGZOBGURwFEkTFnjM-5Sw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AvMaVZmHpmJZiBDGBOr1V7eGZOBGURwFEkTFnjM-5Sw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Email": "={{ $('On form submission').item.json['Candidate Email'] }}",
+            "Job Position\r": "={{ $('On form submission').item.json['Job Position'] }}",
+            "Job Description\r": "={{ $('On form submission').item.json['Job Description'] }}",
+            "Skills Match": "={{ $json.output.skills_match }}",
+            "Education Match": "={{ $json.output.education_match }}",
+            "Experience Match": "={{ $json.output.experience_match }}",
+            "Responsibilities Match": "={{ $json.output.responsibilities_match }}",
+            "Overall Score": "={{ $json.overall_score }}",
+            "Classification": "={{ $json.classification }}",
+            "Missing Skills": "={{ $('Merge').item.json.output.missing_skills }}",
+            "Strengths": "={{ $('Merge').item.json.output.strengths }}",
+            "Weaknesses": "={{ $('Merge').item.json.output.weaknesses }}",
+            "Experience Summary": "={{ $('Merge').item.json.output.experience_summary }}",
+            "Education Summary": "={{ $('Merge').item.json.output.education_summary }}",
+            "Reasoning": "={{ $('Merge').item.json.output.reasoning }}",
+            "Timestamp": "={{ $now }}",
+            "Resume Filename": "={{ $('On form submission').item.json.Resume[0].filename }}",
+            "Candidate Name": "={{ $('On form submission').item.json['Candidate Name'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Candidate Name",
+              "displayName": "Candidate Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Candidate Email",
+              "displayName": "Candidate Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Position\r",
+              "displayName": "Job Position\r",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Description\r",
+              "displayName": "Job Description\r",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Skills Match",
+              "displayName": "Skills Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Education Match",
+              "displayName": "Education Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experience Match",
+              "displayName": "Experience Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Responsibilities Match",
+              "displayName": "Responsibilities Match",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Overall Score",
+              "displayName": "Overall Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Classification",
+              "displayName": "Classification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Missing Skills",
+              "displayName": "Missing Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Strengths",
+              "displayName": "Strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Weaknesses",
+              "displayName": "Weaknesses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experience Summary",
+              "displayName": "Experience Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Education Summary",
+              "displayName": "Education Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reasoning",
+              "displayName": "Reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resume Filename",
+              "displayName": "Resume Filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        784,
+        464
+      ],
+      "id": "e89f8aec-a2a4-44f3-8449-c97acbd3aef1",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4IdK26aCaBSm1Kw6",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Candidate Email'] }}",
+        "subject": "=Application Update -  {{ $('On form submission').item.json['Job Position'] }}",
+        "emailType": "text",
+        "message": "=Hi {{ $('On form submission').item.json['Candidate Name'] }},  Thank you for applying for the {{ $('On form submission').item.json['Job Position'] }} position.  We have completed the initial screening of your application. Your overall evaluation score is {{ $json['Overall Score'] }}/100, and your application has been classified as {{ $json.Classification }}.  Your application is currently under further review by our recruitment team. We will contact you if your application progresses to the next stage of the selection process.  Thank you for your interest in the opportunity.  Best regards, Recruitment Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        336
+      ],
+      "id": "cbc20d10-bb69-4c45-8206-afc5ff3004c9",
+      "name": "Send a message1",
+      "webhookId": "339c2b0c-bf14-42d3-8042-0e60dc96ecca",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DCZaGzOw3htVdaSU",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Candidate Email'] }}",
+        "subject": "=Application Update -  {{ $('On form submission').item.json['Job Position'] }}",
+        "emailType": "text",
+        "message": "=Hi {{ $('On form submission').item.json['Candidate Name'] }},\n\nThank you for applying for the {{ $('On form submission').item.json['Job Position'] }} position.\n\nWe have completed the initial screening of your application. After reviewing your qualifications against the requirements of the position, we are unable to move your application forward at this time.\n\nBased on the initial review, your current qualifications and experience do not sufficiently align with the key requirements of the {{ $('On form submission').item.json['Job Position'] }} position. In particular, the role requires specific skills, experience, and responsibilities that were not sufficiently demonstrated in your application.\n\nReason for the decision:\n\n{{ $('Merge').item.json.output.reasoning }}\n\nWe appreciate the time and effort you invested in the application process and encourage you to consider future opportunities that may better match your experience and qualifications.\n\nWe wish you all the best in your job search.\n\nBest regards,\nRecruitment Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        528
+      ],
+      "id": "60009759-3ca1-4056-aa0c-7eb7f8574e9d",
+      "name": "Send a message2",
+      "webhookId": "a8c57f0e-e356-468d-a776-ce7b405eabc3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DCZaGzOw3htVdaSU",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "08cee8df-a36a-41f2-8eba-914051d13ae7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d920b0323c3b09ecb2af5fe3b16e777bada6519f155422c70ee6746147ef0d16"
+  },
+  "nodeGroups": [],
+  "id": "WTwVG8M3M2sM8z71",
+  "tags": []
+}
