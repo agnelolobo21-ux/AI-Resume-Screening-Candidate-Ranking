@@ -39,7 +39,7 @@ Built as the assigned project for an Agentic AI certification course. The profes
 
 ## Workflow Diagram
 
-![Workflow Canvas](screenshots/workflow-canvas.png)
+![Workflow Canvas](workflow-canvas.png)
 
 ## Sample Results
 
@@ -51,9 +51,10 @@ Three test resumes were run against the same job description in a single consist
 | Jordyn Taylor    | 73             | Review           |
 | Rahul Sharma     | 21             | Not Suitable     |
 
-![Google Sheet Results](screenshots/google-sheet-results.png)
+![Google Sheet Results](google-sheet-results.png)
 
 Results are logged to a Google Sheet ("AI Candidate Evaluations", tab "Candidates") with 18 tracked columns per candidate.
+
 
 ## Key Design Decisions
 
